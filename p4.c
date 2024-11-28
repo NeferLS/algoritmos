@@ -11,8 +11,13 @@ double fixSmallTimes(pmonticulo m, int n, void (*func)(pmonticulo, int *, int)) 
     double init, end, time;
     int *dummyArray = (int *)malloc(n * sizeof(int));
 
+    for (i = 0; i < n; i++) {
+        dummyArray[i] = rand() % 1000000;
+    }
+
     init = microsegundos();
     for (i = 0; i < k; i++) {
+        iniMonticulo(m);
         func(m, dummyArray, n);
     }
     end = microsegundos();
@@ -29,11 +34,12 @@ void auxInsertarMonticulo(pmonticulo m, int *v, int n) {
 }
 
 double timeInsertarMonticulo(int n, int *ajustado){
-    if (n > TAM) n = TAM;
+    if (n > TAM -1) n = TAM -1;
     pmonticulo m = (pmonticulo)malloc(sizeof(struct monticulo));
-    clock_t init, end;
-    double time;
+    double init, end, time;
     int i, x;
+    *ajustado = 0;
+
     iniMonticulo(m);
     init = microsegundos();
     for (i = 0; i < n; i++){
@@ -41,7 +47,7 @@ double timeInsertarMonticulo(int n, int *ajustado){
         insertarMonticulo(m, x);
     }
     end = microsegundos();
-    time = ((double)(end-init));
+    time = end-init;
     if (time < 500){
         time = fixSmallTimes(m, n, auxInsertarMonticulo);
         *ajustado = 1;
@@ -52,20 +58,20 @@ double timeInsertarMonticulo(int n, int *ajustado){
 }
 
 double timeCrearMonticulo(int n, int *ajustado){
-    if (n > TAM) n = TAM;
+    if (n > TAM -1) n = TAM -1;
     pmonticulo m = (pmonticulo)malloc(sizeof(struct monticulo));
     int *v = (int *)malloc(n * sizeof(int));
-    clock_t init, end;
-    double time;
+    double init, end,time ;
     int i;
+    *ajustado = 0;
 
     for (i = 0; i < n; i++)
         v[i] = rand() % 1000000; // elementos aleatorios
 
-    init = clock();
+    init = microsegundos();
     crearMonticulo(m, v, n);
-    end = clock();
-    time = ((double)(end-init));
+    end = microsegundos();
+    time = end-init;
     if (time < 500){
         time = fixSmallTimes(m, n, crearMonticulo);
         *ajustado = 1;
@@ -80,22 +86,10 @@ void testBothHeaps(double (*timeInsert)(int, int *), double (*timeCreate)(int, i
     int sizes[] = {500, 1000, 2000, 4000, 8000, 16000, 32000};
     int num_tries = sizeof(sizes) / sizeof(int);
 
-    printf("n\tTime Insert\tAdjust\tTime Create\tAdjust\n");
-    printf("------------------------------------------------------------\n");
+    printf("Comparacion para insertarMonticulo:\n");
+    printf("n\tTiempo\t\tT/(n)\t\tT/nlog(n)\tT/n^2\t\n");
+    printf("--------------------------------------------------------------------------------\n");
 
-    for (int i = 0; i < num_tries; i++) {
-        int ajustadoInsert = 0, ajustadoCreate = 0;
-        int n = sizes[i];
-
-        double tInsert = timeInsert(n, &ajustadoInsert);
-        double tCreate = timeCreate(n, &ajustadoCreate);
-
-        printf("%d\t%.6f\t%s\t%.6f\t%s\n", n, tInsert, ajustadoInsert ? "*" : " ",
-               tCreate, ajustadoCreate ? "*" : " ");
-    }
-
-    printf("\nComparaciones:\n");
-    printf("t(n)/f(n), t(n)/g(n), t(n)/h(n)\n");
     for (int i = 0; i < num_tries; i++) {
         int ajustado = 0;
         int n = sizes[i];
@@ -105,18 +99,34 @@ void testBothHeaps(double (*timeInsert)(int, int *), double (*timeCreate)(int, i
         double g_n = gn(n);
         double h_n = hn(n);
 
-        printf("%d\t%.6f\t%.6f\t%.6f\n", n, t / f_n, t / g_n, t / h_n);
+        printf("%s%d\t%.6f\t%.6f\t%.6f\t%.6f\t\n",ajustado ? "*" : " ", n, t, t/f_n, t/g_n, t/h_n);
+    }
+
+    printf("\nComparacion para crearMonticulo:\n");
+    printf("n\tTiempo\t\tT/(n)\t\tT/nlog(n)\tT/n^2\t\n");
+    printf("--------------------------------------------------------------------------------\n");
+
+    for (int i = 0; i < num_tries; i++) {
+        int ajustado = 0;
+        int n = sizes[i];
+
+        double t = timeCreate(n, &ajustado);
+        double f_n = fn(n);
+        double g_n = gn(n);
+        double h_n = hn(n);
+
+        printf("%s%d\t%.6f\t%.6f\t%.6f\t%.6f\t\n",ajustado ? "*" : " ", n, t, t/f_n, t/g_n, t/h_n);
     }
 }
 
-double logn(int n) { return n > 0 ? log(n) : 0; }
-double nlogn(int n) { return n * logn(n); }
+double n(int n) { return n; }
+double nlogn(int n) { return n*log(n); }
 double n2(int n) { return n * n; }
 
 int main(){
     srand(time(NULL));
     
     printf("Pruebas de insertarMonticulo y crearMonticulo:\n");
-    testBothHeaps(timeInsertarMonticulo, timeCrearMonticulo, logn, nlogn, n2);
+    testBothHeaps(timeInsertarMonticulo, timeCrearMonticulo, n, nlogn, n2);
 
 }
