@@ -10,7 +10,7 @@ CFLAGS = -Wall -Wextra -lm
 all: $(EXECUTABLE)
 
 $(EXECUTABLE): $(SOURCES) $(HEADERS)
-	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(SOURCES)
+	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(SOURCES) -lm
 
 run: $(EXECUTABLE)
 	./$(EXECUTABLE)

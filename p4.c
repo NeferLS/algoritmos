@@ -1,4 +1,18 @@
+/*
+
+Autores:
+ -> Nefer Labrada Suárez
+ -> Pablo Castro Freire
+ -> Adrián Formigo Gómez
+
+Grupo: 3.3
+
+*/
+
+
 #include "p4.h"
+
+// Gestión del tiempo:
 
 double microsegundos(){
     struct timeval t;
@@ -6,7 +20,8 @@ double microsegundos(){
     return t.tv_sec * 1000000.0 + t.tv_usec;
 }
 
-double fixSmallTimes(pmonticulo m, int n, void (*func)(pmonticulo, int *, int)) {
+double fixSmallTimes(pmonticulo m, int n,
+                     void (*func)(pmonticulo, int *, int)) {
     int i, k = 1000;
     double init, end, time;
     int *dummyArray = (int *)malloc(n * sizeof(int));
@@ -36,15 +51,16 @@ void auxInsertarMonticulo(pmonticulo m, int *v, int n) {
 double timeInsertarMonticulo(int n, int *ajustado){
     if (n > TAM -1) n = TAM -1;
     pmonticulo m = (pmonticulo)malloc(sizeof(struct monticulo));
+    int *v = (int *)malloc(n * sizeof(int));
     double init, end, time;
-    int i, x;
+    int i;
     *ajustado = 0;
 
     iniMonticulo(m);
     init = microsegundos();
     for (i = 0; i < n; i++){
-        x = rand() % 1000000; //creamos vectores aleatorios
-        insertarMonticulo(m, x);
+        v[i] = rand() % 1000000; //creamos vectores aleatorios
+        insertarMonticulo(m, v[i]);
     }
     end = microsegundos();
     time = end-init;
@@ -54,6 +70,7 @@ double timeInsertarMonticulo(int n, int *ajustado){
     }
     
     free(m);
+    free(v);
     return time;
 }
 
@@ -81,52 +98,52 @@ double timeCrearMonticulo(int n, int *ajustado){
     return time;
 }
 
-void testBothHeaps(double (*timeInsert)(int, int *), double (*timeCreate)(int, int *),
-                   double (*fn)(int), double (*gn)(int), double (*hn)(int)) {
-    int sizes[] = {500, 1000, 2000, 4000, 8000, 16000, 32000};
-    int num_tries = sizeof(sizes) / sizeof(int);
-
-    printf("Comparacion para insertarMonticulo:\n");
-    printf("n\tTiempo\t\tT/(n)\t\tT/nlog(n)\tT/n^2\t\n");
-    printf("--------------------------------------------------------------------------------\n");
-
-    for (int i = 0; i < num_tries; i++) {
-        int ajustado = 0;
-        int n = sizes[i];
-
-        double t = timeInsert(n, &ajustado);
-        double f_n = fn(n);
-        double g_n = gn(n);
-        double h_n = hn(n);
-
-        printf("%s%d\t%.6f\t%.6f\t%.6f\t%.6f\t\n",ajustado ? "*" : " ", n, t, t/f_n, t/g_n, t/h_n);
-    }
-
-    printf("\nComparacion para crearMonticulo:\n");
-    printf("n\tTiempo\t\tT/(n)\t\tT/nlog(n)\tT/n^2\t\n");
-    printf("--------------------------------------------------------------------------------\n");
-
-    for (int i = 0; i < num_tries; i++) {
-        int ajustado = 0;
-        int n = sizes[i];
-
-        double t = timeCreate(n, &ajustado);
-        double f_n = fn(n);
-        double g_n = gn(n);
-        double h_n = hn(n);
-
-        printf("%s%d\t%.6f\t%.6f\t%.6f\t%.6f\t\n",ajustado ? "*" : " ", n, t, t/f_n, t/g_n, t/h_n);
-    }
-}
+// Cotas:
 
 double n(int n) { return n; }
 double nlogn(int n) { return n*log(n); }
 double n2(int n) { return n * n; }
+double n0_5(int n) { return pow(n,0.5); }
+
+
+// Printeo de tablas:
+
+void printBothHeaps(double (*tiempometodo)(int, int *), double (*fn)(int),
+                     double (*gn)(int), double (*hn)(int))
+{
+    int n;
+    
+    printf("\nTabla de %s:\n", (tiempometodo == timeInsertarMonticulo)
+             ? "Insertar monticulo" : "Crear monticulo");
+    printf("     n    |   Time (µs)  |   t(n)/f(n)  |   t(n)/g(n)  "
+            "|   t(n)/h(n)\n");
+    printf("-----------------------------------------------------------"
+            "-------------\n");
+
+    for (n = 500; n <= 32000; n = n*2) {
+        int ajustado = 0;
+        double t = tiempometodo(n, &ajustado);
+        double f_n = fn(n);
+        double g_n = gn(n);
+        double h_n = hn(n);
+
+        printf("%s%8d | %12.4f | %12.8f | %12.8f | %12.8f\n", 
+                ajustado ? "*" : " ", n, t, t/f_n, t/g_n, t/h_n);
+    }
+
+    printf("-----------------------------------------------------------"
+            "-------------\n\n");
+}
+
+
+//Main:
 
 int main(){
     srand(time(NULL));
     
-    printf("Pruebas de insertarMonticulo y crearMonticulo:\n");
-    testBothHeaps(timeInsertarMonticulo, timeCrearMonticulo, n, nlogn, n2);
+    printf("Tablas de Insertar y Crear Monticulo:\n");
 
+    for(int i = 1; i <= 5; i++)
+        printBothHeaps(timeInsertarMonticulo, n, nlogn, n2); //en 32000 ocurre una anomalía siempre. REVISAR CÓDIGO
+        //printBothHeaps(timeCrearMonticulo, n0_5, n, n2); //sin fallos
 }
