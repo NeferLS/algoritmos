@@ -1,14 +1,11 @@
 /*
-
-Autores:
- -> Nefer Labrada Suárez
- -> Pablo Castro Freire
- -> Adrián Formigo Gómez
-
-Grupo: 3.3
-
+* Autores:
+*  --> Nefer Labrada Suarez
+*  --> Pablo Castro Freire
+*  --> Adrián Formigo Gómez
+*
+* Grupo 3.3
 */
-
 
 #include "p4.h"
 
@@ -56,10 +53,15 @@ double timeInsertarMonticulo(int n, int *ajustado){
     int i;
     *ajustado = 0;
 
+    // Crear el vector aleatorio antes de medir
+    for (i = 0; i < n; i++) {
+        v[i] = rand() % 1000000;
+    }
+
     iniMonticulo(m);
+
     init = microsegundos();
     for (i = 0; i < n; i++){
-        v[i] = rand() % 1000000; //creamos vectores aleatorios
         insertarMonticulo(m, v[i]);
     }
     end = microsegundos();
@@ -127,7 +129,7 @@ void printBothHeaps(double (*tiempometodo)(int, int *), double (*fn)(int),
         double g_n = gn(n);
         double h_n = hn(n);
 
-        printf("%s%8d | %12.4f | %12.8f | %12.8f | %12.8f\n", 
+        printf("%s%8d | %12.4f | %12.8f | %12.8f | %12.9f\n", 
                 ajustado ? "*" : " ", n, t, t/f_n, t/g_n, t/h_n);
     }
 
@@ -143,7 +145,8 @@ int main(){
     
     printf("Tablas de Insertar y Crear Monticulo:\n");
 
-    for(int i = 1; i <= 5; i++)
+    for(int i = 1; i <= 3; i++) {
         printBothHeaps(timeInsertarMonticulo, n, nlogn, n2); //en 32000 ocurre una anomalía siempre. REVISAR CÓDIGO
-        //printBothHeaps(timeCrearMonticulo, n0_5, n, n2); //sin fallos
+        printBothHeaps(timeCrearMonticulo, n0_5, n, n2); //sin fallos
+    }   
 }

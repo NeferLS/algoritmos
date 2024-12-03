@@ -5,11 +5,7 @@
 #include <math.h>
 #include <sys/time.h>
 
-#define intercambiar(a, b) { \
-    typeof(a) temp = a; \
-    a = b; \
-    b = temp; \
-}
+#define intercambiar(a, b) { int temp = a; a = b; b = temp; }
 
 struct monticulo {
     int ultimo;
@@ -21,7 +17,7 @@ typedef struct monticulo * pmonticulo;
 
 void iniMonticulo(pmonticulo m);
 void flotar(pmonticulo m, int i);
-void hundir(pmonticulo m, int i); //no se si la vamos a usar
+void hundir(pmonticulo m, int i);
 void insertarMonticulo(pmonticulo m, int x);
 void quitarMenor(pmonticulo m);
 int consultarMenor(const pmonticulo m);
