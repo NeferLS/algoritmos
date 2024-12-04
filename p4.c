@@ -9,6 +9,46 @@
 
 #include "p4.h"
 
+
+void inicializar_semilla() {
+    srand(time(NULL));
+}
+
+// Algoritmo de ordenación:
+
+void OrdenarPorMontículos (int v[], int n) {   
+    int i;
+    pmonticulo m = (pmonticulo)malloc(sizeof(struct monticulo));
+    crearMonticulo (m, v, n);
+    for (i = 0; i < n; i++) {
+        v[i] = consultarMenor(m);
+        quitarMenor(m);
+    }
+    free(m);
+}
+
+
+// Casos:
+
+void ascendente(int v[], int n) {
+    int i;
+    for (i = 0; i < n; i++)
+        v[i] = i;
+}
+
+void descendente(int v[], int n) {
+    int i;
+    for (i = 0; i < n; i++)
+        v[i] = n - i - 1;
+}
+
+void aleatorio(int v[], int n) {
+    int m = 2 * n + 1, i;
+    for (i = 0; i < n; i++)
+        v[i] = (rand() % m) - n;
+}
+
+
 // Gestión del tiempo:
 
 double microsegundos(){
@@ -40,17 +80,19 @@ double fixSmallTimes(pmonticulo m, int n,
 }
 
 void auxInsertarMonticulo(pmonticulo m, int *v, int n) {
-    for (int i = 0; i < n; i++) {
+    int i;
+    for (i = 0; i < n; i++) {
         insertarMonticulo(m, v[i]);
     }
 }
 
 double timeInsertarMonticulo(int n, int *ajustado){
-    if (n > TAM -1) n = TAM -1;
-    pmonticulo m = (pmonticulo)malloc(sizeof(struct monticulo));
-    int *v = (int *)malloc(n * sizeof(int));
+    int i, *v;
     double init, end, time;
-    int i;
+    pmonticulo m = (pmonticulo)malloc(sizeof(struct monticulo));
+
+    if (n > TAM -1) n = TAM -1;
+    v = (int *)malloc(n * sizeof(int));
     *ajustado = 0;
 
     // Crear el vector aleatorio antes de medir
@@ -77,11 +119,12 @@ double timeInsertarMonticulo(int n, int *ajustado){
 }
 
 double timeCrearMonticulo(int n, int *ajustado){
-    if (n > TAM -1) n = TAM -1;
+    int i, *v;
+    double init, end, time;
     pmonticulo m = (pmonticulo)malloc(sizeof(struct monticulo));
-    int *v = (int *)malloc(n * sizeof(int));
-    double init, end,time ;
-    int i;
+
+    if (n > TAM -1) n = TAM -1;
+    v = (int *)malloc(n * sizeof(int));
     *ajustado = 0;
 
     for (i = 0; i < n; i++)
@@ -100,12 +143,99 @@ double timeCrearMonticulo(int n, int *ajustado){
     return time;
 }
 
+// Gestión del tiempo para ordenación de vectores:
+
+void ajuste_tiempo(void (*ini)(int [], int),
+                    int v[], int n, double *t_n)
+{
+    int k = 1000;
+    int i;
+    double start, end, tiempo_init;
+
+    start = microsegundos();
+    for (i = 0; i < k; i++) {
+        ini(v, n);  //Solo el tiempo de la inicialización
+    }
+    end = microsegundos();
+    tiempo_init = (end - start) / k; //tiempo tardado en inicializar
+
+    
+    start = microsegundos();
+    for (i = 0; i < k; i++) {
+        OrdenarPorMontículos(v, n);
+        ini(v, n);  //restaura el vector para cada ejecución
+    }
+    end = microsegundos();
+    *t_n = (end - start) / k -tiempo_init;  //tiempo promedio de 1000 repet.
+}
+
+void medirTiempo(void(*ini)(int[], int),int n,
+double *t_n,int *t)
+{
+    int *v = malloc(n * sizeof(int));
+    double start, end;
+
+    ini(v, n);
+    start = microsegundos();
+    OrdenarPorMontículos(v, n);
+    end = microsegundos();
+
+    *t_n = end - start;
+    *t = 0;
+
+    if (*t_n < 500) {
+        ajuste_tiempo(ini, v, n, t_n);
+        *t = 1;  // marca como ajustado
+    }
+    free(v);
+}
+
+
 // Cotas:
 
-double n(int n) { return n; }
-double nlogn(int n) { return n*log(n); }
-double n2(int n) { return n * n; }
-double n0_5(int n) { return pow(n,0.5); }
+double n_1(int n) { return n; }
+double n_log_n(int n) { return n*log(n); }
+double n_2(int n) { return n * n; }
+double n_0_5(int n) { return pow(n,0.5); }
+
+
+// Funcion para test y auxiliares:
+
+void imprimir_vector(int v[], int n) {
+    int i;
+    for (i = 0; i < n; i++) {
+        printf("%d", v[i]);
+        if (i < n - 1) {
+            printf(", ");
+        }
+    }
+    printf("\n");
+}
+
+int esta_ordenado(int v[], int n) {
+    int i;
+    for (i = 1; i < n; i++) {
+        if (v[i - 1] > v[i]) {
+            return 0; // No está ordenado
+        }
+    }
+    return 1; // Está ordenado
+}
+
+void test_ordenacion_monticulos(void (*inicializacion)(int[], int),
+                                 const char* caso){
+    int n = 7; //tamaño test
+    int v[n];
+
+    printf("\nOrdenacion por monticulo con inicializacion %s\n", caso);
+    inicializacion(v, n);
+    imprimir_vector(v, n);
+    printf("ordenado? %d\n", esta_ordenado(v, n));
+    printf("ordenando...\n");
+    OrdenarPorMontículos(v, n);
+    imprimir_vector(v, n);
+    printf("ordenado? %d\n\n", esta_ordenado(v, n));
+}
 
 
 // Printeo de tablas:
@@ -113,9 +243,10 @@ double n0_5(int n) { return pow(n,0.5); }
 void printBothHeaps(double (*tiempometodo)(int, int *), double (*fn)(int),
                      double (*gn)(int), double (*hn)(int))
 {
-    int n;
+    int n, ajustado;
+    double t_n, f_n, g_n, h_n;
     
-    printf("\nTabla de %s:\n", (tiempometodo == timeInsertarMonticulo)
+    printf("\n***** Tabla de %s:\n\n", (tiempometodo == timeInsertarMonticulo)
              ? "Insertar monticulo" : "Crear monticulo");
     printf("     n    |   Time (µs)  |   t(n)/f(n)  |   t(n)/g(n)  "
             "|   t(n)/h(n)\n");
@@ -123,30 +254,77 @@ void printBothHeaps(double (*tiempometodo)(int, int *), double (*fn)(int),
             "-------------\n");
 
     for (n = 500; n <= 32000; n = n*2) {
-        int ajustado = 0;
-        double t = tiempometodo(n, &ajustado);
-        double f_n = fn(n);
-        double g_n = gn(n);
-        double h_n = hn(n);
+        ajustado = 0;
+        t_n = tiempometodo(n, &ajustado);
+        f_n = fn(n);
+        g_n = gn(n);
+        h_n = hn(n);
 
         printf("%s%8d | %12.4f | %12.8f | %12.8f | %12.9f\n", 
-                ajustado ? "*" : " ", n, t, t/f_n, t/g_n, t/h_n);
+                ajustado ? "*" : " ", n, t_n, t_n/f_n, t_n/g_n, t_n/h_n);
     }
 
     printf("-----------------------------------------------------------"
             "-------------\n\n");
 }
 
+void printResultados(void (*inicializacion)(int [], int),
+                     const char* caso, double (*fn)(int), double (*gn)(int),
+                     double (*hn)(int)){
+
+    int n, ajustado;
+    double t_n, f_n, g_n, h_n;
+
+    printf("\n***** Ordenacion por Monticulo - Caso %s:\n\n", caso);
+    printf("     n    |   Time(µs)   |    t(n)/f(n)   |   t(n)/g(n)   "
+            "|   t(n)/h(n)\n");
+    printf("-----------------------------------------------------------"
+            "----------------\n");
+
+    for (n = 500; n <= 32000; n = n*2) {
+
+        f_n = fn(n);
+        g_n = gn(n);
+        h_n = hn(n);
+        
+        medirTiempo(inicializacion, n, &t_n, &ajustado);
+
+        printf("%s%8d | %12.4f |   %12.9f |   %11.9f |   %11.9f\n",
+                ajustado ? "*" : " ", n, t_n, t_n / f_n, t_n / g_n,
+                t_n / h_n);
+    }
+
+    printf("-----------------------------------------------------------"
+            "----------------\n\n");
+}
+
 
 //Main:
 
 int main(){
-    srand(time(NULL));
+    
+    int i;
+    int rep1 = 1;
+    int rep2 = 1;
+
+    inicializar_semilla();
     
     printf("Tablas de Insertar y Crear Monticulo:\n");
 
-    for(int i = 1; i <= 3; i++) {
-        printBothHeaps(timeInsertarMonticulo, n, nlogn, n2); //en 32000 ocurre una anomalía siempre. REVISAR CÓDIGO
-        printBothHeaps(timeCrearMonticulo, n0_5, n, n2); //sin fallos
-    }   
+    for(i = 0; i < rep1; i++) {
+        printBothHeaps(timeInsertarMonticulo, n_1, n_log_n, n_2);
+        printBothHeaps(timeCrearMonticulo, n_0_5, n_1, n_2);
+    }
+
+    test_ordenacion_monticulos(ascendente, "Ascendente");
+    test_ordenacion_monticulos(descendente, "Descendente");
+    test_ordenacion_monticulos(aleatorio, "Aleatoria");
+
+    for(i=0; i < rep2; i++) {
+        printResultados(ascendente, "Ascendente", n_0_5, n_log_n, n_2);
+        printResultados(descendente, "Descendente", n_0_5, n_log_n, n_2);
+        printResultados(aleatorio, "Aleatorio", n_0_5, n_log_n, n_2);
+    }
+
+    return 0;
 }

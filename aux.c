@@ -5,7 +5,7 @@ void iniMonticulo(pmonticulo m){
 }
 
 void flotar(pmonticulo m, int i){
-    while ((i > 1) && (m->vector[i/2] < m->vector[i])){
+    while ((i > 1) && (m->vector[i/2] > m->vector[i])){
         intercambiar(m->vector[i/2],m->vector[i]);
         i = i/2;
     }
@@ -14,9 +14,9 @@ void flotar(pmonticulo m, int i){
 void hundir(pmonticulo m, int i){
     int hijo, tmp = m->vector[i];
     while ((hijo = 2*i) <= m->ultimo) {
-        if (hijo < m->ultimo && m->vector[hijo+1] > m->vector[hijo])
+        if (hijo < m->ultimo && m->vector[hijo+1] < m->vector[hijo])
             hijo++;
-        if (tmp >= m->vector[hijo])
+        if (tmp <= m->vector[hijo])
             break;
         m->vector[i] = m->vector[hijo];
         i = hijo;
@@ -29,7 +29,7 @@ void insertarMonticulo(pmonticulo m, int x){
         printf("Error: Monticulo lleno\n");
         return;
     } else{
-        m->ultimo = m->ultimo +1;
+        m->ultimo++;
         m->vector[m->ultimo] = x;
         flotar(m, m->ultimo);
     }
