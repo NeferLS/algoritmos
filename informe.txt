@@ -1,0 +1,231 @@
+Práctica 4. 
+Ordenación de Montículos. 
+Complejidad Computacional de la ordenación de vectores por Montículos.
+
+-- Autores: 
+        Pablo Castro Freire
+	    Nefer Labrada Suárez
+	    Adrián Formigo Gómez
+
+
+-- Introducción:
+
+En el siguiente informe, se exponen los resultados del estudio de la carga computacional de ordenar "n" elementos mediante
+el método de Ordenación por Montículos en tres casos diferentes: (a) ordenación de un vector ordenado ascendientemente,
+(b) ordenación de un vector ordenado descendientemente y (c) ordenación de un vector ordenado aleatoriamente.
+
+Asimismo, compararemos los resultados de dichas ordenaciones con otras de los informes anteriores.
+Las ordenaciones con las que compararemos los resultados de este documento serán:
+(1) Ordenacion por Inserción
+(2) Ordenación Rápida (Quicksort)
+
+Todas las mediciones se realizarán comparándolas con una cota subestimada <f(n)>, una cota ajustada <g(n)> y una cota sobreestimada <h(n)>, 
+para verificar el comportamiento y carga computacional de la función de ordenación pertinente. 
+
+# Las unidades de todas las mediciones de tiempo, así como sus comparaciones, están hechas en microsegundos (µs). #
+
+-- Características:
+
+Estas son Características de la máquina usada para llevar a cabo las mediciones:
+
+- CPU: 13th Gen Intel® Core™ i5-1335U × 12
+- Velocidad de reloj: 4.6 GHz
+- Memoria: 16,0 GiB
+- Distribución de Linux: Ubuntu 24.04.1 LTS
+- Versión de Kernel: Linux 6.8.0-45-generic
+
+***!! En este estudio existen casos anómalos que se han intentado evitar sin éxito. Serán mencionados en sus respectivos lugares. !!***
+
+-- Análisis de las implementaciones de Ordenación por Montículo:
+
+Este análisis consta de diversas partes:
+	
+	a. Crear las operaciones necesarias para trabajar con montículos de mínimos. Esto es; implementación y funciones base, las cuales serán
+       inicializar un montículo, insertar en un montículo, quitar el valor menor, consultar el valor menor y crear un montículo de mínimos.
+	
+	b. Comprobar que la carga computacional de las funciones "crear Montículo" e "insertar Montículo", siendo O(n) y O(n log n) respectivamente.
+	
+	c. Calcular empíricamente la complejidad computacional de ordenar "n" elementos en cada uno de los tres casos antes mencionados: ordenar
+       un vector ordenado ascendientemente, un vector ordenado descendientemente y un vector ordenado aleatoriamente.
+	
+	d. Se discutirá el por qué de los resultados y las interpretaciones de los mismos.
+	
+	e. Finalmente, se concluirá qué tiempo de tipo de carga computacional tiene cada función y una conclusión final.
+
+########################################################################
+    Comprobación de Carga Computacional de las Funciones Principales 
+########################################################################
+
+Tabla 1: Insertar en Montículo
+
+
+     n    |   Time (µs)  |   t(n)/f(n)    |   t(n)/g(n)   |    t(n)/h(n)
+--------------------------------------------------------------------------
+      125 |    5244.0000 |  110.188094450 | x41.952000000 |   8.688747725
+      250 |    9306.0000 |  112.308089976 |  37.224000000 |   6.741694011
+      500 |   19404.0000 |  134.497825366 |  38.808000000 |   6.244641558
+     1000 |   39663.0000 |  157.901247057 |  39.663000000 |   5.741807345
+     2000 |   78439.0000 |  179.352754841 |  39.219500000 |   5.159847822
+     4000 |  156518.0000 |  205.549439445 |  39.129500000 |   4.717779818
+     8000 |  314305.0000 |  237.071474182 |  39.288125000 |   4.371566105
+    16000 |  629888.0000 |  272.877261853 |  39.368000000 |   4.066797626
+--------------------------------------------------------------------------
+
+COTAS AJUSTADAS:
+-> f(n) es 
+-> g(n) es 
+-> h(n) es 
+
+
+x: casos anómalos
+*: tiempo AJUSTADO promedio (en µs) de 1000 ejecuciones del algoritmo.
+
+- Discusión: A simple vista, se pueden ver varias cosas. Lo primero, es que a medida que se duplican los elementos a buscar, el tiempo linealmente parece seguir una tendencia de la misma naturaleza.
+Para estas funciones, hemos comprobado que las cotas arriba mostradas se ajustan bastante bien a lo que esperamos de ellas, siendo "n" la cota ajustada, con una tendencia a llegar a 39.400, a pesar del dato anómalo en el primer caso. 
+
+- Interpretación: Es de interés fijarse también que el número de colisiones es realmente alto, del orden de casi doscientas millones de colisiones finales. Esto realmente tiene un sentido, pues por como funciona la función de dispersión A (explicado más arriba), es de esperar que una resolución lineal de colisiones dé lugar a tantas, y más teniendo en cuenta el número de elementos que tratamos. Asimismo, podemos ver que este número de colisiones parece estar causando los tiempos tan desorbitados que enseña la tabla, pues de base, ningún caso parece bajar de 5000 microsegundos.
+	     
+Conclusión: Teniendo en cuenta esto, podemos decir con certeza que la cota ajustada para la función de dispersión A con resolución lineal es O(n).
+
+Tabla 2: Ordenar Montículo
+
+     n    |   Time (µs)  |   t(n)/f(n)   |   t(n)/g(n)   |   t(n)/h(n)
+------------------------------------------------------------------------
+*     125 |     196.5810 |    4.13060370 |    1.57340751 |    0.32571371
+*     250 |     390.0790 |    4.70761094 |    1.56117776 |    0.28259115
+      500 |     797.0000 |    5.52436440 |    1.59499092 |    0.25649244
+     1000 |    1565.0000 |    6.23037722 |    1.56608144 |    0.22655695
+     2000 |    2990.0000 |    6.83671053 |    1.49613677 |    0.19668717
+     4000 |    6677.0000 |    8.76866308 |  x 1.67063506 |    0.20125874
+     8000 |   12474.0000 |    9.40878945 |    1.56065196 |    0.17349681
+    16000 |   24841.0000 |   10.76150691 |    1.55406616 |    0.16038299
+------------------------------------------------------------------------
+
+COTAS AJUSTADAS:
+-> f(n) es 
+-> g(n) es 
+-> h(n) es 
+
+
+x: caso anómalo
+*: tiempo AJUSTADO promedio (en µs) de 1000 ejecuciones del algoritmo.
+
+- Discusión: El estudio de cómo la función de resolución cuadrática para la función de dispersión A muestra cosas bastante interesantes. Primero, podemos ver que los tiempos son mucho más bajos que en el caso anterior. Debido a cómo funciona la resolución cuadrática, podemos evitar muchas colisiones y por ende, el tiempo de búsqueda de elementos disminuye. Las cotas son algo curiosas, pero parece que son las que devuelven un valor más coherente que los comparados en el caso anterior. Vemos que, sin contar el caso anómalo de 1.67, con la cota ajustada el tiempo tiende a 1.5540. Finalmente, podemos ver los primeros tiempos inferiores a 500 microsegundos, indicando una mejora en los tiempos.
+
+- Interpretación: El número de colisiones es alto, pero son muchos menos millones que el caso anterior. Vemos que debido al tipo de resolución que estamos usando para esta función de dispersión, evitamos millones de colisiones innecesarias, reduciendo con creces el tiempo de ejecución para todos los casos.
+
+Conclusión: Teniendo en cuenta esto, podemos decir con certeza que la cota ajustada para la función de dispersión A con resolución cuadrática es O(n^0.999).
+
+########################################################################
+    Comprobación de Carga Computacional de las Ordenaciones
+########################################################################
+
+**** Tabla 1: Ordenación de Vector Ordenado ascendientemente
+
+
+     n    |   Time (µs)  |   t(n)/f(n)   |   t(n)/g(n)   |   t(n)/h(n)
+------------------------------------------------------------------------
+*     125 |      19.1070 |   0.401480534 |   0.185420988 |   0.031658258
+*     250 |      38.1790 |   0.460757637 |   0.190459281 |   0.027658622
+*     500 |      74.6610 |   0.517508871 |   0.191462003 |   0.024027581
+*    1000 |     146.4580 |   0.583059800 |   0.193069245 |   0.021201967
+*    2000 |     290.0430 |   0.663190646 |   0.196550246 |   0.019079511
+     4000 |     617.0000 |   0.810283828 | x 0.214935213 |   0.018597670
+     8000 |    1235.0000 |   0.931525972 | x 0.221156939 |   0.017177214
+    16000 |    2181.0000 |   0.944843064 |   0.200770769 |   0.014081369
+------------------------------------------------------------------------
+
+COTAS AJUSTADAS:
+-> f(n) es 
+-> g(n) es 
+-> h(n) es 
+
+[Tiempos de Otras Ordenaciones para 32000 elementos]
+
+-> Ordenacion por Inserción [O(n)]= 0.002381188
+-> Ordenación Rápida [O(n ^1,052)] = 0.026275288
+
+x: caso anómalo
+*: tiempo AJUSTADO promedio (en µs) de 1000 ejecuciones del algoritmo.
+
+- Discusión: Comenzando con el estudio del caso de la función de dispersión B, vemos de primeras un caso muy curioso, y es que el número de colisiones es una décima de lo que era el caso anterior con la resolución doble, el cual era el mejor calculado para el momento. Vemos asimismo que los tiempos son vastamente inferiores a los anteriormente vistos, apuntando claramente que la dispersión B es mucho más eficaz que la dispersión B, incluso con la resolución lineal, con una tendencia de la cota ajustada a 0.1930. Vemos además que aparecen más funciones con un tiempo de resolución inferior a 500, más que en los casos anteriores.
+
+- Interpretación: El número de colisiones es muy inferior a los casos anteriores a pesar de usar la resolución lineal. Esto es debido a cómo funciona la dispersión B, con un desplazamiento de bits a la hora de calcular el valor (para más información, mirar las definiciones de la función de dispersión B). 
+	     
+Conclusión: Teniendo en cuenta esto, podemos decir con certeza que la cota ajustada para la función de dispersión B con resolución lineal es O(n^0.96).
+
+**** Tabla 2: Ordenación de Vector Ordenado descendientemente
+
+
+     n    |   Time (µs)  |   t(n)/f(n)   |   t(n)/g(n)   |   t(n)/h(n)
+------------------------------------------------------------------------
+*     125 |      19.1070 |   0.401480534 |   0.185420988 |   0.031658258
+*     250 |      38.1790 |   0.460757637 |   0.190459281 |   0.027658622
+*     500 |      74.6610 |   0.517508871 |   0.191462003 |   0.024027581
+*    1000 |     146.4580 |   0.583059800 |   0.193069245 |   0.021201967
+*    2000 |     290.0430 |   0.663190646 |   0.196550246 |   0.019079511
+     4000 |     617.0000 |   0.810283828 | x 0.214935213 |   0.018597670
+     8000 |    1235.0000 |   0.931525972 | x 0.221156939 |   0.017177214
+    16000 |    2181.0000 |   0.944843064 |   0.200770769 |   0.014081369
+------------------------------------------------------------------------
+
+COTAS AJUSTADAS:
+-> f(n) es 
+-> g(n) es 
+-> h(n) es 
+
+[Tiempos de Otras Ordenaciones para 32000 elementos]
+
+-> Ordenacion por Inserción [O(n^2)]= 0.000855314
+-> Ordenación Rápida [O(n ^1,052)] = 0.027295687
+
+x: caso anómalo
+*: tiempo AJUSTADO promedio (en µs) de 1000 ejecuciones del algoritmo.
+
+- Discusión: Comenzando con el estudio del caso de la función de dispersión B, vemos de primeras un caso muy curioso, y es que el número de colisiones es una décima de lo que era el caso anterior con la resolución doble, el cual era el mejor calculado para el momento. Vemos asimismo que los tiempos son vastamente inferiores a los anteriormente vistos, apuntando claramente que la dispersión B es mucho más eficaz que la dispersión B, incluso con la resolución lineal, con una tendencia de la cota ajustada a 0.1930. Vemos además que aparecen más funciones con un tiempo de resolución inferior a 500, más que en los casos anteriores.
+
+- Interpretación: El número de colisiones es muy inferior a los casos anteriores a pesar de usar la resolución lineal. Esto es debido a cómo funciona la dispersión B, con un desplazamiento de bits a la hora de calcular el valor (para más información, mirar las definiciones de la función de dispersión B). 
+	     
+Conclusión: Teniendo en cuenta esto, podemos decir con certeza que la cota ajustada para la función de dispersión B con resolución lineal es O(n^0.96).
+
+
+**** Tabla 3: Ordenación de Vector Ordenado aleatoriamente
+
+
+     n    |   Time (µs)  |   t(n)/f(n)   |   t(n)/g(n)   |   t(n)/h(n)
+------------------------------------------------------------------------
+*     125 |      19.1070 |   0.401480534 |   0.185420988 |   0.031658258
+*     250 |      38.1790 |   0.460757637 |   0.190459281 |   0.027658622
+*     500 |      74.6610 |   0.517508871 |   0.191462003 |   0.024027581
+*    1000 |     146.4580 |   0.583059800 |   0.193069245 |   0.021201967
+*    2000 |     290.0430 |   0.663190646 |   0.196550246 |   0.019079511
+     4000 |     617.0000 |   0.810283828 | x 0.214935213 |   0.018597670
+     8000 |    1235.0000 |   0.931525972 | x 0.221156939 |   0.017177214
+    16000 |    2181.0000 |   0.944843064 |   0.200770769 |   0.014081369
+------------------------------------------------------------------------
+
+COTAS AJUSTADAS:
+-> f(n) es 
+-> g(n) es 
+-> h(n) es 
+
+[Tiempos de Otras Ordenaciones para 32000 elementos]
+
+-> Ordenacion por Inserción [O(n^2)]= 0.000443792
+-> Ordenación Rápida [O(n log n)] = 0.011688447
+
+x: caso anómalo
+*: tiempo AJUSTADO promedio (en µs) de 1000 ejecuciones del algoritmo.
+
+- Discusión: Comenzando con el estudio del caso de la función de dispersión B, vemos de primeras un caso muy curioso, y es que el número de colisiones es una décima de lo que era el caso anterior con la resolución doble, el cual era el mejor calculado para el momento. Vemos asimismo que los tiempos son vastamente inferiores a los anteriormente vistos, apuntando claramente que la dispersión B es mucho más eficaz que la dispersión B, incluso con la resolución lineal, con una tendencia de la cota ajustada a 0.1930. Vemos además que aparecen más funciones con un tiempo de resolución inferior a 500, más que en los casos anteriores.
+
+- Interpretación: El número de colisiones es muy inferior a los casos anteriores a pesar de usar la resolución lineal. Esto es debido a cómo funciona la dispersión B, con un desplazamiento de bits a la hora de calcular el valor (para más información, mirar las definiciones de la función de dispersión B). 
+	     
+Conclusión: Teniendo en cuenta esto, podemos decir con certeza que la cota ajustada para la función de dispersión B con resolución lineal es O(n^0.96).
+
+
+-- Conclusión final:
+
+Al finalizar el estudio, observamos que los tiempos de búsqueda y el número de colisiones en cada caso dependen en gran medida de la combinación entre la función de dispersión y el método de resolución de colisiones. En términos generales, la dispersión A muestra un número significativamente más alto de colisiones, que se traduce en tiempos de búsqueda elevados, sobre todo en el caso de resolución lineal. Por otro lado, la dispersión B, al incluir un desplazamiento de bits en su cálculo de índice, minimiza las colisiones incluso en la resolución lineal, lo que mejora los tiempos de búsqueda. Para los datos analizados y las funciones de dispersión empleadas, se concluye que:
+- La dispersión A es más eficiente cuando se utiliza una resolución de colisiones doble, alcanzando tiempos de búsqueda y una cota ajustada que sigue aproximadamente O(n^1.0052).
+- La dispersión B, en cambio, muestra su mejor desempeño cuando se combina con resolución cuadrática, con una cota ajustada que sigue O(n^0.958).

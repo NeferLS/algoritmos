@@ -278,6 +278,7 @@ double n_1(int n) { return n; }
 double n_log_n(int n) { return n*log(n); }
 double n_2(int n) { return n * n; }
 double n_0_5(int n) { return pow(n,0.5); }
+double n_1_199999(int n) { return pow(n,1.199999); }
 
 
 // Funcion para test y auxiliares:
@@ -394,7 +395,7 @@ int main(){
 
     for(i = 0; i < rep1; i++) {
         printBothHeaps(timeInsertarMonticulo, n_1, n_log_n, n_2);
-        printBothHeaps(timeCrearMonticulo, n_0_5, n_1, n_2);
+        printBothHeaps(timeCrearMonticulo, n_0_5, n_1_199999, n_2);
     }
 
     test_ordenacion_monticulos(ascendente, "Ascendente");
