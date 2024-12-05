@@ -279,6 +279,7 @@ double n_log_n(int n) { return n*log(n); }
 double n_2(int n) { return n * n; }
 double n_0_5(int n) { return pow(n,0.5); }
 double n_1_199999(int n) { return pow(n,1.199999); }
+double n_1_2051(int n) { return pow(n,1.2051); }
 
 
 // Funcion para test y auxiliares:
@@ -403,8 +404,8 @@ int main(){
     test_ordenacion_monticulos(aleatorio, "Aleatoria");
 
     for(i=0; i < rep2; i++) {
-        printResultados(ascendente, "Ascendente", n_0_5, n_log_n, n_2);
-        printResultados(descendente, "Descendente", n_0_5, n_log_n, n_2);
+        printResultados(ascendente, "Ascendente", n_0_5, n_1_2051, n_2);
+        printResultados(descendente, "Descendente", n_0_5, n_1_199999, n_2);
         printResultados(aleatorio, "Aleatorio", n_0_5, n_log_n, n_2);
     }
 
